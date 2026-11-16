@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  chatbot-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: novatech-chatbot
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GEMINI_CHAT_MODEL=${GEMINI_CHAT_MODEL:-gemini-2.5-flash}
+      - GEMINI_COMPLEX_MODEL=${GEMINI_COMPLEX_MODEL:-gemini-2.5-pro}
+      - GEMINI_EMBEDDING_MODEL=${GEMINI_EMBEDDING_MODEL:-text-embedding-004}
+      - DATABASE_URL=sqlite+aiosqlite:///./data/chatbot.db
+      - CHROMA_PERSIST_DIR=./data/chroma_db
+      - APP_ENV=production
+    volumes:
+      - ./data:/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
